@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+/* @import "docx-preview/dist/docx-preview.css"; */
 
 @custom-variant dark (&:is(.dark *));
 

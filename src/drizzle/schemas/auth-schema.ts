@@ -1,4 +1,13 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  uuid,
+  integer,
+} from "drizzle-orm/pg-core";
+
+import { relations } from "drizzle-orm";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -59,3 +68,41 @@ export const verification = pgTable("verification", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export const documents = pgTable("documents", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  // Add reference to user table with cascading delete
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+
+  // File Metadata
+  title: text("title").notNull(),
+  url: text("url").notNull(), // Firebase Download URL
+  storagePath: text("storage_path").notNull(), // Firebase fullPath
+  mimeType: text("mime_type"), // e.g., 'application/pdf'
+  size: integer("size"),
+
+  // Progress Tracking
+  progress: text("progress"), // CFI for EPUB, Page # for PDF
+  progressPercentage: integer("progress_percentage").default(0),
+  isFinished: boolean("is_finished").default(false),
+
+  // Timestamps
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date()), // Auto-update timestamp
+});
+
+// Define relations (Optional but helpful for queries)
+export const usersRelations = relations(user, ({ many }) => ({
+  documents: many(documents),
+}));
+
+export const documentsRelations = relations(documents, ({ one }) => ({
+  user: one(user, {
+    fields: [documents.userId],
+    references: [user.id],
+  }),
+}));

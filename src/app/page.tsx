@@ -16,9 +16,9 @@ export default function Home() {
         {session == null ? (
           <NewUserLandingPage />
         ) : (
-          <Layout>
-            <AuthenticatedUserHomepage session={session} />
-          </Layout>
+          // <Layout>
+          <AuthenticatedUserHomepage session={session} />
+          // {/* </Layout> */}
         )}
       </div>
     </div>
